@@ -5,7 +5,7 @@ import numpy as np
 from mmc_vec import MMC
 
 
-BASE_PATH = 'C:\\Users\\ttanj\\UoB\\WS18\\DBM\\data_1'
+BASE_PATH = 'C:\\Users\\ttanj\\UoB\\WS18\\DBM\\data\\data_mmc'
 HEIGHT = 100
 WIDTH = 100
 RGB = 1
@@ -14,7 +14,7 @@ RGB = 1
 def get_dirname(target):
     dirname = ''
     for each in target:
-        dirname += re.sub('\.', '', str(each))
+        dirname += re.sub(r'\.', '', str(each))
     return os.path.join(BASE_PATH, dirname)
 
 
@@ -62,10 +62,6 @@ def data_gen(mmc_net, targets, init_config):
 def main():
     mmc_net = MMC(inputs=None, df=10, mode='inverse', seg_len=1, num_iter=25, live_plot=False)
     init_config = np.array([[0.99, 0.15], [0.707, 0.707], [0.15, 0.99]])
-    # targets = [
-    #     [0, 1.8], [-1, 1.8], [-1.8, 1.8], [0.5, 1.8], [1, 1.8],
-    #     [0, 1.5], [-1, 1.5], [-1.5, 1.5], [0.5, 1.5], [1, 1.5]
-    # ]
     targets = get_targets()
     data_gen(mmc_net, targets, init_config)
 
