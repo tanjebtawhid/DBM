@@ -28,7 +28,7 @@ class SimpleMovement:
 
     def set_target(self, target):
         self.target = target
-        self.out[1] = target
+        self.out[-1] = target
 
     def init_draw(self):
         plt.figure(figsize=(5, 3))
@@ -78,10 +78,10 @@ class SimpleMovement:
 
     @classmethod
     def main(cls):
-        init_config = np.array([[110], [0]])
+        init_config = np.array([[130], [0]])
         mov = SimpleMovement(1, 5, 20, True)
         mov.initialize(init_config)
-        mov.set_target(0)
+        mov.set_target(5)
         mov.init_draw()
         mov.move()
         print(mov.out)
@@ -129,13 +129,14 @@ class DataGen:
     def prepare_data(self):
         data_pairs = DataGen.get_data_pairs()
         x = np.zeros((len(data_pairs), self.height, self.width, self.num_channel))
-        y = np.zeros((len(data_pairs), self.height, self.width, self.num_channel))
+        # y = np.zeros((len(data_pairs), self.height, self.width, self.num_channel))
+        y = np.zeros((len(data_pairs), self.height, self.width, 1))
 
         for i, item in zip(range(len(data_pairs)), data_pairs):
             x[i, :, :, 0] = cv2.imread(item[0], 0)
             x[i, :, :, 1] = cv2.imread(item[1], 0)
             y[i, :, :, 0] = cv2.imread(item[2], 0)
-            y[i, :, :, 1] = cv2.imread(item[2], 0)
+            # y[i, :, :, 1] = cv2.imread(item[2], 0)
 
         return x, y
 
