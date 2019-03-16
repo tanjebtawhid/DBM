@@ -4,9 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-BASE_PATH = 'C:\\Users\\ttanj\\UoB\\WS18\\DBM\\data\\data_simple_movement'
-
-
 class SimpleMovement:
 
     def __init__(self, segment_size, beta, num_iter, live_plot):
@@ -98,36 +95,40 @@ class DataGen:
     @staticmethod
     def get_target_angles():
         angles = []
-        for theta in range(0, 190, 15):
+        for theta in range(15, 190, 15):
             angles.append(theta)
         return angles
 
     @staticmethod
-    def data_gen(net, targets, init_config):
+    def data_gen(net, targets, init_config, path):
+        if not os.path.exists(path):
+            os.mkdir(path)
         for i, target in enumerate(targets):
-            data_path = os.path.join(BASE_PATH, str(i))
+            data_path = os.path.join(path, str(i))
             if not os.path.exists(data_path):
                 os.mkdir(data_path)
             net.initialize(init_config)
             net.set_target(target)
             net.move(save_dir=data_path)
+            np.save(os.path.join(data_path, 'target.npy'), net.out)
             plt.close('all')
 
     @staticmethod
-    def get_data_pairs():
+    def get_data_pairs(size, path):
         data_pairs = []
-        for dirname in os.listdir(BASE_PATH):
-            fnames = os.listdir(os.path.join(BASE_PATH, dirname))
-            for j in range(len(fnames) - 2):
+        for dirname in os.listdir(path):
+            fnames = os.listdir(os.path.join(path, dirname))
+            size = len(fnames) - 2 if size is None else size
+            for j in range(size):
                 data_pairs.append((
-                    os.path.join(BASE_PATH, dirname, fnames[j]),
-                    os.path.join(BASE_PATH, dirname, fnames[j + 1]),
-                    os.path.join(BASE_PATH, dirname, fnames[j + 2])
+                    os.path.join(path, dirname, fnames[j]),
+                    os.path.join(path, dirname, fnames[j + 1]),
+                    os.path.join(path, dirname, fnames[j + 2])
                 ))
         return data_pairs
 
-    def prepare_data(self):
-        data_pairs = DataGen.get_data_pairs()
+    def prepare_data(self, path, size=None):
+        data_pairs = DataGen.get_data_pairs(size, path)
         x = np.zeros((len(data_pairs), self.height, self.width, self.num_channel))
         # y = np.zeros((len(data_pairs), self.height, self.width, self.num_channel))
         y = np.zeros((len(data_pairs), self.height, self.width, 1))
@@ -140,16 +141,36 @@ class DataGen:
 
         return x, y
 
+    def get_feature_target_pairs(self, path, size=None):
+        ft_pairs = []
+        for dirname in os.listdir(path):
+            fnames = [fname for fname in os.listdir(os.path.join(path, dirname)) if fname.endswith('.png')]
+            size = len(fnames) - 2 if size is None else size
+            for j in range(size):
+                ft_pairs.append((
+                    os.path.join(path, dirname, fnames[j]),
+                    os.path.join(path, dirname, 'target.npy')
+                ))
+
+        x = np.zeros((len(ft_pairs), self.num_channel, self.height, self.width))
+        y = np.zeros((len(ft_pairs), 3))
+        for i, item in zip(range(x.shape[0]), ft_pairs):
+            x[i, 0, :, :] = cv2.imread(item[0], 0)
+            y[i] = np.load(item[1]).squeeze(axis=1)
+
+        return x, y
+
     @classmethod
-    def main(cls):
+    def main(cls, path):
         init_config = np.array([[0], [0]])
         mov = SimpleMovement(1, 5, 20, False)
         targets = DataGen.get_target_angles()
-        DataGen.data_gen(mov, targets, init_config)
+        DataGen.data_gen(mov, targets, init_config, path)
 
 
 if __name__ == '__main__':
     np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
+    dpath = 'C:\\Users\\ttanj\\UoB\\WS18\\DBM\\data\\data_simple_movement_2'
 
-    SimpleMovement.main()
-    # DataGen.main()
+    # SimpleMovement.main()
+    DataGen.main(dpath)
