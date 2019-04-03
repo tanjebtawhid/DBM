@@ -1,0 +1,12 @@
+{
+  "init_config": [0, 0],
+  "segment_length": 1,
+  "beta": 5,
+  "num_iter": 20,
+  "live_plot_data_gen": false,
+  "live_plot_net": true,
+  "target": 180,
+  "target_start": 15,
+  "target_stop": 190,
+  "target_step_size": 15
+}
