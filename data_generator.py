@@ -5,9 +5,10 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-from typing import Tuple, List, Union, Dict
+from typing import Tuple, List, Union, Dict, Optional
 
 from simple_movement import SimpleMovement
+from mmc import MMC
 
 
 logger = logging.getLogger(__name__)
@@ -69,8 +70,7 @@ class DataGen:
                     targets.append([r * np.cos(theta), r * np.sin(theta)])
         return targets
 
-    @staticmethod
-    def data_gen(net: SimpleMovement, targets: List[int], init_config: List[int], path: str):
+    def data_gen(self, net: SimpleMovement, targets: List[int], init_config: List[int], path: str):
         """Iterates over list of targets, peforms simulation for each target, generates and saves
         images in the given directory.
 
@@ -91,15 +91,14 @@ class DataGen:
         if not os.path.exists(path):
             os.mkdir(path)
         for i, target in enumerate(targets):
-            logger.info('Current target angle : {} degree'.format(target))
+            logger.info('Current target: {}'.format(target))
             data_path = os.path.join(path, (3-len(str(i))) * '0' + str(i))
             if not os.path.exists(data_path):
                 os.mkdir(data_path)
-            net.initialize(*init_config)
+            net.initialize(init_config)
             net.set_target(target)
-            net.move(save_dir=data_path)
-            np.save(os.path.join(data_path, 'target.npy'),
-                    np.array([net.alpha, net.velocity, net.target]).reshape((3, 1)))
+            net.move(fig_size=(int(self.width/100), int(self.height/100)), save_dir=data_path)
+            np.save(os.path.join(data_path, 'target.npy'), net.get_params())
             plt.close('all')
 
     def get_pairs(self, path: str, target_mmc_out: bool, size: Union[int, None]) -> List[List[str]]:
@@ -136,7 +135,7 @@ class DataGen:
                     ft_pairs[-1] += [os.path.join(path, dirname, fnames[j + self.num_channel])]
         return ft_pairs
 
-    def get_data(self, path: str, target_mmc_out: bool, size: Union[int, None] = None, channel_first: bool = True) \
+    def get_data(self, path: str, target_mmc_out: bool, size: Optional[int] = None, channel_first: bool = True) \
             -> Tuple[np.ndarray, np.ndarray]:
         """Generates training data from images produced by the MMC network simulation. Target y can
         be of two different types, i)output vector of the MMC network ii)image based on the MMC output.
@@ -177,37 +176,53 @@ class DataGen:
             x = x.transpose((0, 2, 3, 1))
         return x, y
 
-    @staticmethod
-    def generate(path: str, config: Dict[str, Union[int, bool, List[int]]]):
+    def _get_config(self, net_type: str):
+        if net_type == 'simple':
+            with open(os.path.abspath('.\\config_simple_movement.json'), 'r', encoding='utf8') as fobj:
+                config = json.load(fobj)
+        else:
+            with open(os.path.abspath('.\\config_mmc.json'), 'r', encoding='utf8') as fobj:
+                config = json.load(fobj)
+        return config
+
+    def _get_net(self, net_type: str, config):
+        if net_type == 'simple':
+            return SimpleMovement(config['segment_length'],
+                                  config['beta'],
+                                  config['num_iter'],
+                                  config['live_plot_data_gen'])
+        elif net_type == 'mmc':
+            return MMC(config['segment_length'],
+                       config['beta'],
+                       config['num_iter'],
+                       config['live_plot_data_gen'],
+                       config['mode'])
+        else:
+            logger.warning('Invalid network type')
+
+    def generate(self, net_type: str, path: str):
         """Simulates MMC network for different target values.
 
         Parameters
         ----------
         path: str
             directory to save images from MMC simulation
-        config
-            network configurations
 
         Returns
         -------
         """
-        mov = SimpleMovement(config['segment_length'],
-                             config['beta'],
-                             config['num_iter'],
-                             config['live_plot_data_gen'])
-
-        targets = DataGen.get_target_angels(config['segment_length'],
+        config = self._get_config(net_type)
+        net = self._get_net(net_type, config)
+        targets = DataGen.get_target_angels(config['num_segment'],
                                             config['target_start'],
                                             config['target_stop'],
                                             config['target_step_size'])
 
-        DataGen.data_gen(mov, targets, config['init_config'], path)
+        self.data_gen(net, targets, config['init_config'], path)
 
 
 if __name__ == '__main__':
     dpath = os.path.abspath('.\\data\\data_simple_movement_2')
 
-    with open(os.path.abspath('.\\config_simple_movement.json'), 'r', encoding='utf8') as fobj:
-        config = json.load(fobj)
-
-    DataGen.generate(dpath, config)
+    dgen = DataGen(100, 100, 3)
+    dgen.generate('mmc', dpath)

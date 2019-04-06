@@ -3,7 +3,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 
 
 class SimpleMovement:
@@ -30,6 +30,10 @@ class SimpleMovement:
         self.velocity = None
         self.target = None
 
+    def __str__(self):
+        return 'alpha: {}\nvelocity: {}\ntarget: {}'.format(
+            self.alpha, self.velocity, self.target)
+
     def get_weight(self) -> np.ndarray:
         """Initializes the weight matrix of the recuurent network
 
@@ -43,21 +47,18 @@ class SimpleMovement:
             [1, df, 0], [-1, 0, 1], [0, 0, 1]])
         return w
 
-    def initialize(self, alpha: int, velocity: float):
+    def initialize(self, init_config: Dict[str, int]):
         """Intializes start angel and velocity
 
         Parameters
         ----------
-        alpha: int
-            start angel
-        velocity: float
-            start velocity
-
+        init_config
+            initial alpha and velocity
         Returns
         -------
         """
-        self.alpha = alpha
-        self.velocity = velocity
+        self.alpha = init_config['alpha']
+        self.velocity = init_config['velocity']
 
     def set_target(self, target: int):
         """Sets target angel for the segment
@@ -72,11 +73,13 @@ class SimpleMovement:
         """
         self.target = target
 
-    def set_params(self, alpha: int, velocity: float, target: int):
+    def get_params(self):
+        return np.array([self.alpha, self.velocity, self.target]).reshape((3, 1))
+
+    def set_params(self, alpha: int, velocity: float):
         """Updates parameters in each iteration"""
         self.alpha = alpha
         self.velocity = velocity
-        self.target = target
 
     def init_draw(self):
         """Initializes figure to plot"""
@@ -100,20 +103,22 @@ class SimpleMovement:
         self.plot_segment.set_xdata([0, segment_x])
         self.plot_segment.set_ydata([0, segment_y])
 
-    def save_figure(self, step: int, save_dir: str):
+    def save_figure(self, step: int, fig_size: Tuple[int, int], save_dir: str):
         """Save postion of the segment as image, needed to train the autoencoder
 
         Parameters
         ----------
         step: int
             current iteration
+        fig_size: Tuple[int, int]
+            size of the image
         save_dir: int
             directory to save image
 
         Returns
         -------
         """
-        fig, ax = plt.subplots(figsize=(1, 1))
+        fig, ax = plt.subplots(figsize=fig_size)
         ax.set(xlim=[-3.5, 3.5], ylim=[-1.5, 3.5])
         ax.get_yaxis().set_visible(False)
         ax.get_xaxis().set_visible(False)
@@ -135,14 +140,15 @@ class SimpleMovement:
                     plt.pause(0.1)
                     self.draw()
             else:
-                self.save_figure(iteration, kwargs['save_dir'])
+                self.save_figure(iteration, kwargs['fig_size'], kwargs['save_dir'])
+                plt.close('all')  # for memory issue while generating data
             out = np.dot(weights, out)
             out[-1] = self.target
-            self.set_params(*out)
+            self.set_params(*out[:2, :])
             iteration += 1
 
-    @classmethod
-    def simulate(cls, config: Dict[str, Union[int, bool, List]]):
+    @staticmethod
+    def simulate(config: Dict[str, Union[int, bool, List]]):
         """Simulates the network for a given configuration and target
 
         Parameters
@@ -157,12 +163,11 @@ class SimpleMovement:
                              config['beta'],
                              config['num_iter'],
                              config['live_plot_net'])
-        net.initialize(*config['init_config'])
+        net.initialize(config['init_config'])
         net.set_target(config['target'])
         net.init_draw()
         net.move()
-        print(net.alpha, net.velocity, net.target)
-        plt.show()
+        print(net)
 
 
 if __name__ == '__main__':

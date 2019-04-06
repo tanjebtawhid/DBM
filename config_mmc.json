@@ -1,0 +1,25 @@
+{
+  "init_config": {
+    "inverse": {
+      "l1": [0.99, 0.15],
+      "l2": [0.707, 0.707],
+      "l3": [0.15, 0.99]
+      },
+    "forward": {
+      "l1": [4, 0],
+      "l2": [2, 3],
+      "l3": [0, 3]
+    }
+  },
+  "segment_length": 1,
+  "num_segment": 3,
+  "beta": 5,
+  "num_iter": 20,
+  "live_plot_data_gen": false,
+  "live_plot_net": true,
+  "mode": "inverse",
+  "target": [-1.8, 1.8],
+  "target_start": 0,
+  "target_stop": 190,
+  "target_step_size": 90
+}
