@@ -3,7 +3,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-from typing import List, Dict, Union, Tuple
+from typing import Dict, Tuple
 
 
 class SimpleMovement:
@@ -73,8 +73,11 @@ class SimpleMovement:
         """
         self.target = target
 
-    def get_params(self):
-        return np.array([self.alpha, self.velocity, self.target]).reshape((3, 1))
+    def get_params(self) -> np.ndarray:
+        """Returns netowrk parameters"""
+        return np.array([np.cos(np.radians(self.alpha)),
+                         self.velocity,
+                         np.cos(np.radians(self.target))]).reshape((3, 1))
 
     def set_params(self, alpha: int, velocity: float):
         """Updates parameters in each iteration"""
@@ -148,7 +151,7 @@ class SimpleMovement:
             iteration += 1
 
     @staticmethod
-    def simulate(config: Dict[str, Union[int, bool, List]]):
+    def simulate(config: Dict):
         """Simulates the network for a given configuration and target
 
         Parameters

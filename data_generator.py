@@ -70,7 +70,7 @@ class DataGen:
                     targets.append([r * np.cos(theta), r * np.sin(theta)])
         return targets
 
-    def data_gen(self, net: SimpleMovement, targets: List[int], init_config: List[int], path: str):
+    def data_gen(self, net: SimpleMovement, targets: List[int], init_config: Dict[str, Union[int, Dict]], path: str):
         """Iterates over list of targets, peforms simulation for each target, generates and saves
         images in the given directory.
 
@@ -125,7 +125,7 @@ class DataGen:
         ft_pairs = []
         for dirname in os.listdir(path):
             fnames = [fname for fname in os.listdir(os.path.join(path, dirname)) if fname.endswith('.png')]
-            size = len(fnames) - 2 if size is None else size
+            size = len(fnames)-self.num_channel-1 if size is None else size
             for j in range(size):
                 ft_pairs.append(
                     [os.path.join(path, dirname, fnames[j + i]) for i in range(self.num_channel)])
@@ -172,8 +172,11 @@ class DataGen:
                 y[i] = np.load(item[-1]).squeeze(axis=1)
             else:
                 y[i, 0, :, :] = cv2.imread(item[-1], 0)
+
         if not channel_first:
             x = x.transpose((0, 2, 3, 1))
+            if not target_mmc_out:
+                y = y.transpose((0, 2, 3, 1))
         return x, y
 
     def _get_config(self, net_type: str):
@@ -205,6 +208,8 @@ class DataGen:
 
         Parameters
         ----------
+        net_type: str
+            SimpleMovement or MMC
         path: str
             directory to save images from MMC simulation
 
@@ -224,5 +229,5 @@ class DataGen:
 if __name__ == '__main__':
     dpath = os.path.abspath('.\\data\\data_simple_movement_2')
 
-    dgen = DataGen(100, 100, 3)
-    dgen.generate('mmc', dpath)
+    dgen = DataGen(100, 100, 2)
+    dgen.generate('simple', dpath)

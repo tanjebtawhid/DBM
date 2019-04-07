@@ -172,9 +172,6 @@ class MMC:
 if __name__ == "__main__":
     np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
-    # inputs_forward = np.array([[4, 0], [2, 3], [0, 3]])
-    # mmc_net = MMC(inputs_forward, df, 'forward', 0.1)
-
     with open(os.path.abspath('.\\config_mmc.json'), 'r', encoding='utf8') as fobj:
         config = json.load(fobj)
 
