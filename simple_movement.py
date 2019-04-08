@@ -1,9 +1,18 @@
 import os
 import json
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
 from typing import Dict, Tuple
+
+
+logger = logging.getLogger(__name__)
+stream_handler = logging.StreamHandler()
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(funcName)s - %(message)s')
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+logger.setLevel(logging.INFO)
 
 
 class SimpleMovement:
@@ -30,7 +39,8 @@ class SimpleMovement:
         self.velocity = None
         self.target = None
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """String representation"""
         return 'alpha: {}\nvelocity: {}\ntarget: {}'.format(
             self.alpha, self.velocity, self.target)
 
@@ -54,8 +64,6 @@ class SimpleMovement:
         ----------
         init_config
             initial alpha and velocity
-        Returns
-        -------
         """
         self.alpha = init_config['alpha']
         self.velocity = init_config['velocity']
@@ -67,9 +75,6 @@ class SimpleMovement:
         ----------
         target: int
             target angel
-
-        Returns
-        -------
         """
         self.target = target
 
@@ -80,7 +85,15 @@ class SimpleMovement:
                          np.cos(np.radians(self.target))]).reshape((3, 1))
 
     def set_params(self, alpha: int, velocity: float):
-        """Updates parameters in each iteration"""
+        """Updates parameters in each iteration
+
+        Parameters
+        ----------
+        alpha: int
+            current angle of the segment
+        velocity: float
+            velocity of angular movement
+        """
         self.alpha = alpha
         self.velocity = velocity
 
@@ -115,11 +128,8 @@ class SimpleMovement:
             current iteration
         fig_size: Tuple[int, int]
             size of the image
-        save_dir: int
+        save_dir: str
             directory to save image
-
-        Returns
-        -------
         """
         fig, ax = plt.subplots(figsize=fig_size)
         ax.set(xlim=[-3.5, 3.5], ylim=[-1.5, 3.5])
@@ -133,7 +143,13 @@ class SimpleMovement:
         fig.savefig(os.path.join(save_dir, (3-len(str(step))) * '0' + str(step) + '.png'))
 
     def move(self, **kwargs):
-        """Performs training/iteration of the MMC network"""
+        """Performs training/iteration
+
+        Parameters
+        ----------
+        kwargs
+            keyword arguments such as figuresize and save directory
+        """
         weights = self.get_weight()
         iteration = 0
         out = np.array([self.alpha, self.velocity, self.target]).reshape((3, 1))
@@ -157,10 +173,7 @@ class SimpleMovement:
         Parameters
         ----------
         config
-            network configurations
-
-        Returns
-        -------
+            network configuration
         """
         net = SimpleMovement(config['segment_length'],
                              config['beta'],
@@ -170,7 +183,7 @@ class SimpleMovement:
         net.set_target(config['target'])
         net.init_draw()
         net.move()
-        print(net)
+        logger.info('Network parameters:\n{}'.format(net))
 
 
 if __name__ == '__main__':

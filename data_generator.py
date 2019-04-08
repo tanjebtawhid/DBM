@@ -58,7 +58,7 @@ class DataGen:
         Returns
         -------
         angels:
-            list of target angels of list of target coordinates
+            list of target angels or list of target coordinates
         """
         targets = []
         for r in range(1, num_segment+1):
@@ -84,9 +84,6 @@ class DataGen:
             initial alpha and velocity
         path: str
             directory to save images
-
-        Returns
-        -------
         """
         if not os.path.exists(path):
             os.mkdir(path)
@@ -179,7 +176,19 @@ class DataGen:
                 y = y.transpose((0, 2, 3, 1))
         return x, y
 
-    def _get_config(self, net_type: str):
+    def _get_config(self, net_type: str) -> Dict:
+        """Loads network configurations
+
+        Parameters
+        ----------
+        net_type: str
+            MMC or SimpleMovement
+
+        Returns
+        -------
+        config
+            configuration dictionary
+        """
         if net_type == 'simple':
             with open(os.path.abspath('.\\config_simple_movement.json'), 'r', encoding='utf8') as fobj:
                 config = json.load(fobj)
@@ -188,7 +197,19 @@ class DataGen:
                 config = json.load(fobj)
         return config
 
-    def _get_net(self, net_type: str, config):
+    def _get_net(self, net_type: str, config) -> Union[MMC, SimpleMovement]:
+        """Initializes and returns the network
+
+        Parameters
+        ----------
+        net_type: str
+            type of the network
+        config: Dict
+            network configurations
+        Returns
+        -------
+            either MMC or SimpleMovement network
+        """
         if net_type == 'simple':
             return SimpleMovement(config['segment_length'],
                                   config['beta'],
@@ -212,9 +233,6 @@ class DataGen:
             SimpleMovement or MMC
         path: str
             directory to save images from MMC simulation
-
-        Returns
-        -------
         """
         config = self._get_config(net_type)
         net = self._get_net(net_type, config)

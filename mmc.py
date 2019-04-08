@@ -3,13 +3,13 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-from typing import Tuple
+from typing import Tuple, List, Dict
 from sklearn.preprocessing import normalize
 
 
 class MMC:
 
-    def __init__(self, seg_len, beta, num_iter, live_plot, mode):
+    def __init__(self, seg_len: int, beta: int, num_iter: int, live_plot: bool, mode: str):
         self.seg_len = seg_len
         self.beta = beta
         self.num_iter = num_iter
@@ -22,12 +22,20 @@ class MMC:
         self.d2 = None
         self.target = None
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """String representation"""
         return 'l1: {}\nl2: {}\nl3: {}\n' \
                'd1: {}\nd2: {}\ntarget: {}'\
             .format(self.l1, self.l2, self.l3, self.d1, self.d2, self.target)
 
-    def _get_weights(self):
+    def _get_weights(self) -> np.ndarray:
+        """Initializes the weight matrix of the recuurent network
+
+        Returns
+        -------
+        wmat: np.ndarray
+            weight matrix
+        """
         off_diag = 1 / self.beta
         diag = (self.beta - 2) / self.beta
         wmat = np.array([
@@ -40,13 +48,28 @@ class MMC:
         ])
         return wmat
 
-    def set_target(self, target):
+    def set_target(self, target: List[int]):
+        """Sets target coordinate
+
+        Parameters
+        ----------
+        target: List[int]
+            target coordinate
+        """
         self.target = np.array(target).reshape(1, 2)
 
-    def get_params(self):
+    def get_params(self) -> np.ndarray:
+        """Returns network parameters"""
         return np.vstack((self.l1, self.l2, self.l3, self.d1, self.d2, self.target))
 
-    def set_params(self, out):
+    def set_params(self, out: np.ndarray):
+        """Sets network parameters
+
+        Parameters
+        ----------
+        out: np.ndarray
+            numpy array containing current values of parameters
+        """
         self.d1 = out[3:4, :]
         self.d2 = out[4:5, :]
         if self.mode == 'forward':
@@ -56,13 +79,27 @@ class MMC:
         self.l2 = out[1:2, :]
         self.l3 = out[2:3, :]
 
-    def initialize(self, init_config):
+    def initialize(self, init_config: Dict):
+        """Initializes network depending on mode of operation
+
+        Parameters
+        ----------
+        init_config: Dict
+            initial network configuration
+        """
         if self.mode == 'forward':
             self.init_forward(init_config['forward'])
         else:
             self.init_inverse(init_config['inverse'])
 
-    def init_forward(self, init_config):
+    def init_forward(self, init_config: Dict):
+        """Intializes network in forward mode
+
+        Parameters
+        ----------
+        init_config: Dict
+            initial configuration for forward mode
+        """
         self.l1 = np.array(init_config['l1']).reshape(1, 2)
         self.l2 = np.array(init_config['l2']).reshape(1, 2)
         self.l3 = np.array(init_config['l3']).reshape(1, 2)
@@ -70,7 +107,14 @@ class MMC:
         self.d2 = np.array([[0, 0]])
         self.target = np.array([[0, 0]])
 
-    def init_inverse(self, init_config):
+    def init_inverse(self, init_config: Dict):
+        """Initializes network in inverse mode
+
+        Parameters
+        ----------
+        init_config: Dict
+            initial configuration for inverse mode
+        """
         self.l1 = np.array(init_config['l1']).reshape(1, 2)
         self.l2 = np.array(init_config['l2']).reshape(1, 2)
         self.l3 = np.array(init_config['l3']).reshape(1, 2)
@@ -78,6 +122,7 @@ class MMC:
         self.d2 = np.add(self.l2, self.l3)
 
     def _forward(self):
+        """forward run"""
         out = np.vstack((self.l1, self.l2, self.l3, self.d1, self.d2, self.target))
         weights = self._get_weights()
         # Suppress recurrent connection of input nodes
@@ -92,6 +137,13 @@ class MMC:
             iteration += 1
 
     def _inverse(self, **kwargs):
+        """Inverse run
+
+        Parameters
+        ----------
+        kwargs
+            keyword arguments such as figuresize and save directory
+        """
         out = np.vstack((self.l1, self.l2, self.l3, self.d1, self.d2, self.target))
         weights = self._get_weights()
         weights[5, 5] = 0
@@ -114,6 +166,7 @@ class MMC:
             iteration += 1
 
     def init_draw(self):
+        """Initializes figure to plot"""
         plt.figure(figsize=(10, 6))
         self.plot_target = plt.plot([0, self.target[0, 0]], [0, self.target[0, 1]], linestyle=':', linewidth=1.0,
                                     color='gray', marker='x')[0]
@@ -125,6 +178,7 @@ class MMC:
         plt.axes().get_xaxis().set_visible(False)
 
     def _draw(self):
+        """Updates plot with current position of the segment"""
         l1 = self.l1
         l2 = np.add(self.l1, self.l2)
         l3 = np.add(np.add(self.l1, self.l2), self.l3)
@@ -134,7 +188,18 @@ class MMC:
         self.plot_arm.set_xdata([0, l1[0, 0], l2[0, 0], l3[0, 0]])
         self.plot_arm.set_ydata([0, l1[0, 1], l2[0, 1], l3[0, 1]])
 
-    def _save_figure(self, step, fig_size: Tuple[int, int], save_dir):
+    def _save_figure(self, step, fig_size: Tuple[int, int], save_dir: str):
+        """Save postion of the segment as image, needed to train the autoencoder
+
+        Parameters
+        ----------
+        step: int
+            current iteration
+        fig_size: Tuple[int, int]
+            size of the image
+        save_dir: str
+            directory to save image
+        """
         fig, ax = plt.subplots(figsize=fig_size)
         ax.set(xlim=[-3.5, 3.5], ylim=[-1.5, 3.5])
         ax.get_yaxis().set_visible(False)
@@ -149,6 +214,13 @@ class MMC:
         fig.savefig(os.path.join(save_dir, (3-len(str(step))) * '0' + str(step) + '.png'))
 
     def move(self, **kwargs):
+        """Performs training/iteration
+
+        Parameters
+        ----------
+        kwargs
+            keyword arguments such as figuresize and save directory
+        """
         if self.mode == 'forward':
             self._forward()
         elif self.mode == 'inverse':
@@ -156,6 +228,13 @@ class MMC:
 
     @staticmethod
     def simulate(config):
+        """Simulates the network for a given configuration and target
+
+        Parameters
+        ----------
+        config
+            network configuration
+        """
         net = MMC(config['segment_length'],
                   config['beta'],
                   config['num_iter'],
