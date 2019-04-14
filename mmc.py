@@ -1,10 +1,19 @@
 import os
 import json
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
 from typing import Tuple, List, Dict
 from sklearn.preprocessing import normalize
+
+
+logger = logging.getLogger(__name__)
+stream_handler = logging.StreamHandler()
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(funcName)s - %(message)s')
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+logger.setLevel(logging.INFO)
 
 
 class MMC:
@@ -246,7 +255,7 @@ class MMC:
             net.set_target(config['target'])
             net.init_draw()
         net.move()
-        print(net)
+        logger.info(net)
 
 
 if __name__ == "__main__":
@@ -256,3 +265,4 @@ if __name__ == "__main__":
         config = json.load(fobj)
 
     MMC.simulate(config)
+    plt.show()

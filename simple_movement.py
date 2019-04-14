@@ -65,7 +65,7 @@ class SimpleMovement:
         init_config
             initial alpha and velocity
         """
-        self.alpha = init_config['alpha']
+        self.alpha = np.radians(init_config['alpha'])
         self.velocity = init_config['velocity']
 
     def set_target(self, target: int):
@@ -76,15 +76,13 @@ class SimpleMovement:
         target: int
             target angel
         """
-        self.target = target
+        self.target = np.radians(target)
 
     def get_params(self) -> np.ndarray:
         """Returns netowrk parameters"""
-        # return np.array([np.cos(np.radians(self.alpha)),
-        #                  self.velocity,
-        #                  np.cos(np.radians(self.target))]).reshape((3, 1))
-        return np.array([np.cos(np.radians(self.alpha)),
-                         np.sin(np.radians(self.alpha))]).reshape(2, 1)
+        return np.array([self.alpha,
+                         self.velocity,
+                         self.target]).reshape((3, 1))
 
     def set_params(self, alpha: int, velocity: float):
         """Updates parameters in each iteration
@@ -102,8 +100,10 @@ class SimpleMovement:
     def init_draw(self):
         """Initializes figure to plot"""
         plt.figure(figsize=(5, 3))
-        target_x = self.segment_size * np.cos(np.radians(self.target))
-        target_y = self.segment_size * np.sin(np.radians(self.target))
+
+        target_x = self.segment_size * np.cos(self.target)
+        target_y = self.segment_size * np.sin(self.target)
+
         self.plot_target = plt.plot([0, target_x], [0, target_y], linestyle='--',
                                     linewidth=1, color='gray', marker='x')[0]
         self.plot_segment = plt.plot([0, target_x], [0, target_y], linestyle='--',
@@ -115,8 +115,9 @@ class SimpleMovement:
 
     def draw(self):
         """Updates plot with current position of the segment"""
-        segment_x = self.segment_size * np.cos(np.radians(self.alpha))
-        segment_y = self.segment_size * np.sin(np.radians(self.alpha))
+        segment_x = self.segment_size * np.cos(self.alpha)
+        segment_y = self.segment_size * np.sin(self.alpha)
+
         plt.plot([0, segment_x], [0, segment_y], linestyle='--', linewidth=1, color='gray')
         self.plot_segment.set_xdata([0, segment_x])
         self.plot_segment.set_ydata([0, segment_y])
@@ -138,8 +139,8 @@ class SimpleMovement:
         ax.get_yaxis().set_visible(False)
         ax.get_xaxis().set_visible(False)
 
-        segment_x = self.segment_size * np.cos(np.radians(self.alpha))
-        segment_y = self.segment_size * np.sin(np.radians(self.alpha))
+        segment_x = self.segment_size * np.cos(self.alpha)
+        segment_y = self.segment_size * np.sin(self.alpha)
 
         ax.plot([0, segment_x], [0, segment_y], linestyle='-', linewidth=2.0, color='gray')
         fig.savefig(os.path.join(save_dir, (3-len(str(step))) * '0' + str(step) + '.png'))
@@ -164,7 +165,7 @@ class SimpleMovement:
                 self.save_figure(iteration, kwargs['fig_size'], kwargs['save_dir'])
                 plt.close('all')  # for memory issue while generating data
             out = np.dot(weights, out)
-            out[-1] = self.target
+            # out[-1] = self.target
             self.set_params(*out[:2, :])
             iteration += 1
 
@@ -195,3 +196,4 @@ if __name__ == '__main__':
         config = json.load(fobj)
 
     SimpleMovement.simulate(config)
+    plt.show()

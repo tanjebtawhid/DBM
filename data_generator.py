@@ -61,8 +61,8 @@ class DataGen:
             list of target angels or list of target coordinates
         """
         targets = []
-        for r in range(1, num_segment+1):
-            for theta in range(start, end, step):
+        for r in np.arange(1, num_segment+1):
+            for theta in np.arange(start, end, step):
                 if num_segment == 1:
                     targets.append(theta)
                 else:
@@ -245,7 +245,7 @@ class DataGen:
 
 
 if __name__ == '__main__':
-    dpath = os.path.abspath('.\\data\\data_simple_movement_3')
+    dpath = os.path.abspath('.\\data\\data_mmc')
 
     dgen = DataGen(100, 100, 2)
-    dgen.generate('simple', dpath)
+    dgen.generate('mmc', dpath)
