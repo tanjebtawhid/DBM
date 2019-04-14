@@ -245,7 +245,7 @@ class DataGen:
 
 
 if __name__ == '__main__':
-    dpath = os.path.abspath('.\\data\\data_simple_movement_2')
+    dpath = os.path.abspath('.\\data\\data_simple_movement_3')
 
     dgen = DataGen(100, 100, 2)
     dgen.generate('simple', dpath)

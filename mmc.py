@@ -10,6 +10,7 @@ from sklearn.preprocessing import normalize
 class MMC:
 
     def __init__(self, seg_len: int, beta: int, num_iter: int, live_plot: bool, mode: str):
+        """MMC network with three segmented arm"""
         self.seg_len = seg_len
         self.beta = beta
         self.num_iter = num_iter
