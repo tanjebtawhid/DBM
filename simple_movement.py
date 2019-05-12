@@ -80,9 +80,9 @@ class SimpleMovement:
 
     def get_params(self) -> np.ndarray:
         """Returns netowrk parameters"""
-        return np.array([self.alpha,
+        return np.array([np.cos(self.alpha),
                          self.velocity,
-                         self.target]).reshape((3, 1))
+                         np.cos(self.target)]).reshape((3, 1))
 
     def set_params(self, alpha: int, velocity: float):
         """Updates parameters in each iteration

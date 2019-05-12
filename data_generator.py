@@ -245,7 +245,7 @@ class DataGen:
 
 
 if __name__ == '__main__':
-    dpath = os.path.abspath('.\\data\\data_mmc')
+    dpath = os.path.abspath('.\\data\\data_simple_movement\\cartesian\\')
 
     dgen = DataGen(100, 100, 2)
-    dgen.generate('mmc', dpath)
+    dgen.generate('simple', dpath)
