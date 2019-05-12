@@ -39,7 +39,7 @@ class MMC:
             .format(self.l1, self.l2, self.l3, self.d1, self.d2, self.target)
 
     def _get_weights(self) -> np.ndarray:
-        """Initializes the weight matrix of the recuurent network
+        """Initializes the weight matrix of the recurrent network
 
         Returns
         -------
@@ -103,7 +103,7 @@ class MMC:
             self.init_inverse(init_config['inverse'])
 
     def init_forward(self, init_config: Dict):
-        """Intializes network in forward mode
+        """Initializes network in forward mode
 
         Parameters
         ----------
@@ -152,7 +152,7 @@ class MMC:
         Parameters
         ----------
         kwargs
-            keyword arguments such as figuresize and save directory
+            keyword arguments such as figure size and save directory
         """
         out = np.vstack((self.l1, self.l2, self.l3, self.d1, self.d2, self.target))
         weights = self._get_weights()
@@ -199,7 +199,7 @@ class MMC:
         self.plot_arm.set_ydata([0, l1[0, 1], l2[0, 1], l3[0, 1]])
 
     def _save_figure(self, step, fig_size: Tuple[int, int], save_dir: str):
-        """Save postion of the segment as image, needed to train the autoencoder
+        """Save position of the segment as image, needed to train the autoencoder
 
         Parameters
         ----------
@@ -229,7 +229,7 @@ class MMC:
         Parameters
         ----------
         kwargs
-            keyword arguments such as figuresize and save directory
+            keyword arguments such as figure size and save directory
         """
         if self.mode == 'forward':
             self._forward()

@@ -45,7 +45,7 @@ class SimpleMovement:
             self.alpha, self.velocity, self.target)
 
     def get_weight(self) -> np.ndarray:
-        """Initializes the weight matrix of the recuurent network
+        """Initializes the weight matrix of the recurrent network
 
         Returns
         -------
@@ -58,7 +58,7 @@ class SimpleMovement:
         return w
 
     def initialize(self, init_config: Dict[str, int]):
-        """Intializes start angel and velocity
+        """Initializes start angel and velocity
 
         Parameters
         ----------
@@ -79,7 +79,7 @@ class SimpleMovement:
         self.target = np.radians(target)
 
     def get_params(self) -> np.ndarray:
-        """Returns netowrk parameters"""
+        """Returns network parameters"""
         return np.array([np.cos(self.alpha),
                          self.velocity,
                          np.cos(self.target)]).reshape((3, 1))
@@ -123,7 +123,7 @@ class SimpleMovement:
         self.plot_segment.set_ydata([0, segment_y])
 
     def save_figure(self, step: int, fig_size: Tuple[int, int], save_dir: str):
-        """Save postion of the segment as image, needed to train the autoencoder
+        """Save position of the segment as image, needed to train the autoencoder
 
         Parameters
         ----------
@@ -151,7 +151,7 @@ class SimpleMovement:
         Parameters
         ----------
         kwargs
-            keyword arguments such as figuresize and save directory
+            keyword arguments such as figure size and save directory
         """
         weights = self.get_weight()
         iteration = 0

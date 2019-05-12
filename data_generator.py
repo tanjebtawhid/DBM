@@ -22,7 +22,7 @@ logger.setLevel(logging.INFO)
 class DataGen:
 
     def __init__(self, height: int, width: int, num_channel: int):
-        """Preapres and generates data for autoencoder traiing
+        """Prepares and generates data for autoencoder training
 
         Parameters
         ----------
@@ -53,7 +53,7 @@ class DataGen:
         end: int
            largest target angel
         step: int
-            diference between target angels
+            difference between target angels
 
         Returns
         -------
@@ -71,7 +71,7 @@ class DataGen:
         return targets
 
     def data_gen(self, net: SimpleMovement, targets: List[int], init_config: Dict[str, Union[int, Dict]], path: str):
-        """Iterates over list of targets, peforms simulation for each target, generates and saves
+        """Iterates over list of targets, performs simulation for each target, generates and saves
         images in the given directory.
 
         Parameters
@@ -108,7 +108,7 @@ class DataGen:
             path to the directory containing images from MMC simulation
         size: int
             number of images to consider for each target of the MMC network
-            simulation. As, at the begining of the simulation of the MMC network
+            simulation. As, at the beginning of the simulation of the MMC network
             variation between images are high, size defines the number of iterations
             to take into account.
         target_mmc_out: bool
@@ -143,7 +143,7 @@ class DataGen:
             path to the directory containing images from MMC simulation
         size: int
             number of images to consider for each target of the MMC network
-            simulation. As, at the begining of the simulation of the MMC network
+            simulation. As, at the beginning of the simulation of the MMC network
             variation between images are high, size defines the number of iterations
             to take into account.
         target_mmc_out: bool
